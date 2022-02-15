@@ -1,17 +1,18 @@
-﻿using Blazor.ServerSide.Helpers;
 using DatabaseUpdater;
-using DevExpress.ExpressApp.Blazor.DemoServices;
+using DevExpress.ExpressApp.DC;
+
 using DevExpress.ExpressApp.Xpo;
 
 namespace Microsoft.Extensions.DependencyInjection {
     public static class ApplicationBuilderExtensions {
-        public static IApplicationBuilder UseDemoData(this IApplicationBuilder app, string connectionString) {
-            //using (var objectSpaceProvider = new XPObjectSpaceProvider(connectionString)) {
-            //    SecurityProvider.RegisterEntities(objectSpaceProvider);
-            //    using (var objectSpace = objectSpaceProvider.CreateUpdatingObjectSpace(true)) {
-            //        new Updater(objectSpace).UpdateDatabase();
-            //    }
-            //}
+        public static WebApplication UseDemoData(this WebApplication app) {
+            IXpoDataStoreProvider xpoDataStoreProvider = app.Services.GetRequiredService<IXpoDataStoreProvider>();
+            ITypesInfo typesInfo = app.Services.GetRequiredService<ITypesInfo>();
+            using (var objectSpaceProvider = new XPObjectSpaceProvider(xpoDataStoreProvider, typesInfo, null)) {
+                using (var objectSpace = objectSpaceProvider.CreateUpdatingObjectSpace(true)) {
+                    new Updater(objectSpace).UpdateDatabase();
+                }
+            }
             return app;
         }
     }
